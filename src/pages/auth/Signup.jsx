@@ -7,28 +7,52 @@ export default function Signup() {
         username: '',
         email: '',
         password: ''
-    })
+    });
+    const [success, setSuccess] = useState("");
+    const [error, setError] = useState("");
 
     const changeInput = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
-        })
-    }
+        });
+    };
 
     const submitForm = (event) => {
-        event.preventDefault()
-        console.log(formData)
-
+        event.preventDefault();
+        setSuccess("");
+        setError("");
+        if (!formData.username || !formData.email || !formData.password) {
+            setError("All fields are required.");
+            return;
+        }
         const user = {
             username: formData.username,
             email: formData.email,
             password: formData.password
         };
+        axios.post('https://fakestoreapi.com/users', user).then(response => {
+            console.log('backend user resp.', response.data);
+            setSuccess("Account created successfully!");
 
-        axios.post('https://fakestoreapi.com/users', user)
-            .then(response => console.log('backend user resp.', response.data));
-    }
+            setFormData({
+                username: '',
+                email: '',
+                password: ''
+            });
+
+            setTimeout(() => {
+                setSuccess("");
+            }, 3000);
+        })
+            .catch(err => {
+                setError("Something went wrong. Try again.");
+
+                setTimeout(() => {
+                    setError("");
+                }, 3000);
+            });
+    };
 
     return (
         <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -36,6 +60,9 @@ export default function Signup() {
                 <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">
                     Create Account
                 </h2>
+
+                {error && ( <div className="bg-red-100 text-red-600 px-4 py-2 rounded-lg mb-3">{error}</div> )}
+                {success && ( <div className="bg-green-100 text-green-700 px-4 py-2 rounded-lg mb-3">{success}</div> )}
 
                 <form onSubmit={submitForm} className="space-y-4">
                     <input name="username" type="text" placeholder="Username"
@@ -64,8 +91,8 @@ export default function Signup() {
                         Login
                     </Link>
                 </p>
+
             </div>
         </div>
-    )
+    );
 }
-
